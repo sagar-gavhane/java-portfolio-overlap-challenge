@@ -10,10 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -46,7 +43,7 @@ class CommandExecutorTest {
     void testSingletonInstance() throws Exception {
         // Create a temporary file
         Path tempFile = tempDir.resolve("test_commands.txt");
-        Files.write(tempFile, List.of("ADD_STOCK TEST_FUND"));
+        Files.write(tempFile, Collections.singletonList("ADD_STOCK TEST_FUND"));
 
         CommandExecutor instance1 = CommandExecutor.getInstance(tempFile.toString());
         CommandExecutor instance2 = CommandExecutor.getInstance(tempFile.toString());
@@ -80,11 +77,11 @@ class CommandExecutorTest {
     @Test
     void testAddStockCommand() throws Exception {
         Path tempFile = tempDir.resolve("test_commands.txt");
-        Files.write(tempFile, List.of("ADD_STOCK AXIS_BLUECHIP HATSUN AGRO PRODUCT LIMITED"));
+        Files.write(tempFile, Collections.singletonList("ADD_STOCK AXIS_BLUECHIP HATSUN AGRO PRODUCT LIMITED"));
 
         MutualFund mockFund = mock(MutualFund.class);
         when(mockFund.getFundName()).thenReturn("AXIS_BLUECHIP");
-        when(exchangeService.getMutualFunds()).thenReturn(new HashSet<>(List.of(mockFund)));
+        when(exchangeService.getMutualFunds()).thenReturn(new HashSet<>(Collections.singletonList(mockFund)));
 
         commandExecutor = CommandExecutor.getInstance(tempFile.toString());
 
@@ -95,7 +92,7 @@ class CommandExecutorTest {
     @Test
     void testCurrentPortfolioCommand() throws Exception {
         Path tempFile = tempDir.resolve("test_commands.txt");
-        Files.write(tempFile, List.of("CURRENT_PORTFOLIO AXIS_BLUECHIP AXIS_MIDCAP"));
+        Files.write(tempFile, Collections.singletonList("CURRENT_PORTFOLIO AXIS_BLUECHIP AXIS_MIDCAP"));
 
         MutualFund mockFund1 = mock(MutualFund.class);
         MutualFund mockFund2 = mock(MutualFund.class);
@@ -111,7 +108,7 @@ class CommandExecutorTest {
     @Test
     void testCalculateOverlapCommand() throws Exception {
         Path tempFile = tempDir.resolve("test_commands.txt");
-        Files.write(tempFile, List.of("CALCULATE_OVERLAP FUND1"));
+        Files.write(tempFile, Collections.singletonList("CALCULATE_OVERLAP FUND1"));
 
         MutualFund mockFund = mock(MutualFund.class);
         when(exchangeService.getMutualFundByName("FUND1")).thenReturn(Optional.of(mockFund));
@@ -127,21 +124,21 @@ class CommandExecutorTest {
     @Test
     void testCalculateOverlapWithNonExistentFund() throws Exception {
         Path tempFile = tempDir.resolve("test_commands.txt");
-        Files.write(tempFile, List.of("CALCULATE_OVERLAP NONEXISTENT_FUND"));
+        Files.write(tempFile, Collections.singletonList("CALCULATE_OVERLAP NONEXISTENT_FUND"));
 
         when(exchangeService.getMutualFundByName("NONEXISTENT_FUND")).thenReturn(Optional.empty());
 
         commandExecutor = CommandExecutor.getInstance(tempFile.toString());
         commandExecutor.execute();
 
-        assertEquals("FUND_NOT_FOUND", outputStream.toString(),
+        assertEquals("FUND_NOT_FOUND", outputStream.toString().trim(),
                 "Should output FUND_NOT_FOUND for non-existent fund");
     }
 
     @Test
     void testInvalidCommand() throws Exception {
         Path tempFile = tempDir.resolve("test_commands.txt");
-        Files.write(tempFile, List.of("INVALID_COMMAND FUND1"));
+        Files.write(tempFile, Collections.singletonList("INVALID_COMMAND FUND1"));
 
         commandExecutor = CommandExecutor.getInstance(tempFile.toString());
 

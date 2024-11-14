@@ -63,7 +63,7 @@ public class CommandExecutor {
                             .filter(mutualFund -> mutualFund.getFundName().equals(mfName))
                             .findFirst();
 
-                    if (mf.isEmpty()) {
+                    if (!mf.isPresent()) {
                         throw new IllegalArgumentException("Mutual fund not found: " + mfName);
                     }
 
@@ -77,7 +77,7 @@ public class CommandExecutor {
                     for (String fundName : fundNames) {
                         Optional<MutualFund> optionalMutualFund = exchangeService.getMutualFundByName(fundName);
 
-                        if (optionalMutualFund.isEmpty()) {
+                        if (!optionalMutualFund.isPresent()) {
                             throw new IllegalArgumentException("Mutual fund not found: " + fundName);
                         } else {
                             MutualFund mutualFund = optionalMutualFund.get();
@@ -92,12 +92,13 @@ public class CommandExecutor {
                     String mfName = split[1];
                     Optional<MutualFund> optionalMutualFund = exchangeService.getMutualFundByName(mfName);
 
-                    if (optionalMutualFund.isEmpty()) {
-                        System.out.print("FUND_NOT_FOUND");
+                    if (!optionalMutualFund.isPresent()) {
+                        System.out.println("FUND_NOT_FOUND");
                         break;
                     }
 
-                    StringBuilder calculatedOverlapping = OverlapService.calculateOverlapping(investor.getPortfolio().getMutualFunds(), optionalMutualFund.get());
+                    MutualFund mf = optionalMutualFund.get();
+                    StringBuilder calculatedOverlapping = OverlapService.calculateOverlapping(investor.getPortfolio().getMutualFunds(), mf);
                     System.out.print(calculatedOverlapping);
                     break;
                 }
